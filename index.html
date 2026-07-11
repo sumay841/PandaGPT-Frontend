@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PandaGPT</title>
+  <meta name="description" content="Get instant AI-powered explanations for your homework in simple language." />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+
+  <!-- ============================================================ NAVBAR ============================================================ -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-inner">
+      <a href="#" class="nav-logo" onclick="showPage('home'); return false;">
+        <span class="logo-icon">🐼</span>
+        <span class="logo-text">PandaGPT</span>
+      </a>
+
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#" class="nav-link active" data-page="home"    onclick="showPage('home');    return false;">Home</a></li>
+        <li><a href="#" class="nav-link"        data-page="helper"  onclick="showPage('helper');  return false;">Chat</a></li>
+        <li><a href="#" class="nav-link"        data-page="quiz"    onclick="showPage('quiz');    return false;">Quiz</a></li>
+        <li><a href="#" class="nav-link"        data-page="history" onclick="showPage('history'); return false;">
+          History <span class="history-badge" id="historyBadge" style="display:none">0</span>
+        </a></li>
+        <li><a href="#" class="nav-link"        data-page="about"   onclick="showPage('about');   return false;">About</a></li>
+      </ul>
+
+      <div class="nav-controls">
+        <!-- Auth controls — filled by JS -->
+        <div id="authControls" class="auth-nav-area"></div>
+
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+          <span class="sun-icon">☀️</span>
+          <span class="moon-icon">🌙</span>
+        </button>
+        <button class="hamburger" id="hamburger" aria-label="Open menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Mobile menu -->
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="#" class="mobile-link" onclick="showPage('home');    closeMobileMenu(); return false;">Home</a>
+    <a href="#" class="mobile-link" onclick="showPage('helper');  closeMobileMenu(); return false;">Chat</a>
+    <a href="#" class="mobile-link" onclick="showPage('quiz');    closeMobileMenu(); return false;">Quiz</a>
+    <a href="#" class="mobile-link" onclick="showPage('history'); closeMobileMenu(); return false;">History</a>
+    <a href="#" class="mobile-link" onclick="showPage('about');   closeMobileMenu(); return false;">About</a>
+    <div id="mobileAuthControls" class="mobile-auth-area"></div>
+  </div>
+
+  <!-- ============================================================ AUTH MODAL ============================================================ -->
+  <div class="auth-overlay" id="authOverlay" onclick="overlayClick(event)">
+    <div class="auth-modal glass-card">
+      <button class="auth-close" onclick="closeAuthModal()" aria-label="Close">✕</button>
+
+      <div class="auth-header">
+        <span class="auth-icon">🎓</span>
+        <h2 class="auth-title" id="authModalTitle">Welcome Back</h2>
+        <p class="auth-subtitle" id="authModalSub">Sign in to your account</p>
+      </div>
+
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="loginTab"    onclick="switchAuthTab('login')">Sign In</button>
+        <button class="auth-tab"        id="registerTab" onclick="switchAuthTab('register')">Register</button>
+      </div>
+
+      <!-- Login form -->
+      <form id="loginForm" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label class="form-label" for="loginEmail">📧 Email</label>
+          <input type="email" id="loginEmail" class="form-input" placeholder="your@email.com" autocomplete="email" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="loginPassword">🔑 Password</label>
+          <input type="password" id="loginPassword" class="form-input" placeholder="••••••••" autocomplete="current-password" required />
+        </div>
+        <div class="auth-error" id="loginError"></div>
+        <button type="submit" class="btn btn-primary btn-full" id="loginBtn">
+          <span class="btn-text">Sign In</span>
+        </button>
+        <p class="auth-switch">Don't have an account? <a href="#" onclick="switchAuthTab('register'); return false;">Register here</a></p>
+      </form>
+
+      <!-- Register form -->
+      <form id="registerForm" onsubmit="handleRegister(event)" style="display:none">
+        <div class="form-group">
+          <label class="form-label" for="regName">👤 Full Name</label>
+          <input type="text" id="regName" class="form-input" placeholder="Your full name" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="regUsername">🆔 Username</label>
+          <input type="text" id="regUsername" class="form-input" placeholder="username" pattern="[a-zA-Z0-9_]+" title="Letters, numbers and underscores only" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="regEmail">📧 Email</label>
+          <input type="email" id="regEmail" class="form-input" placeholder="your@email.com" autocomplete="email" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="regPassword">🔑 Password</label>
+          <input type="password" id="regPassword" class="form-input" placeholder="Min 6 characters" autocomplete="new-password" minlength="6" required />
+        </div>
+        <div class="auth-error" id="registerError"></div>
+        <button type="submit" class="btn btn-primary btn-full" id="registerBtn">
+          <span class="btn-text">Create Account</span>
+        </button>
+        <p class="auth-switch">Already have an account? <a href="#" onclick="switchAuthTab('login'); return false;">Sign in</a></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================================ PAGE: HOME ============================================================ -->
+  <main id="page-home" class="page active">
+    <section class="hero">
+      <div class="hero-bg-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+      </div>
+      <div class="hero-content">
+        <div class="hero-badge">🐼 PandaGPT</div>
+        <h1 class="hero-title">Panda<span class="gradient-text">GPT</span></h1>
+        <p class="hero-subtitle">Chat with AI to get instant, step-by-step explanations for any homework question.</p>
+        <div class="hero-actions">
+          <button class="btn btn-primary btn-lg" onclick="showPage('helper')">🚀 Start Learning</button>
+          <button class="btn btn-ghost btn-lg"   onclick="showPage('about')">Learn More →</button>
+        </div>
+        <div class="hero-stats">
+          <div class="stat-chip">📚 8 Subjects</div>
+          <div class="stat-chip">🎙️ Voice Support</div>
+          <div class="stat-chip">💬 Real Chat</div>
+          <div class="stat-chip">🆓 100% Free</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Student Reviews -->
+    <section class="reviews-section">
+      <div class="section-header">
+        <h2 class="section-title">What Students Say</h2>
+        <p class="section-sub">Thousands of students already love PandaGPT — here's what a few of them think.</p>
+      </div>
+      <div class="reviews-grid">
+
+        <div class="review-card">
+          <div class="review-stars">★★★★★</div>
+          <p class="review-text">"PandaGPT explained quadratic equations step-by-step better than my textbook ever did. Got an A on my test!"</p>
+          <div class="review-author">
+            <div class="review-avatar" style="background:linear-gradient(135deg,#4f46e5,#7c3aed)">A</div>
+            <div>
+              <div class="review-name">Aanya Sharma</div>
+              <div class="review-meta">Class 10 · Math</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="review-card">
+          <div class="review-stars">★★★★★</div>
+          <p class="review-text">"I used the voice feature to ask about photosynthesis while cooking dinner. The AI read the answer back — so convenient!"</p>
+          <div class="review-author">
+            <div class="review-avatar" style="background:linear-gradient(135deg,#0ea5e9,#06b6d4)">K</div>
+            <div>
+              <div class="review-name">Kwame Asante</div>
+              <div class="review-meta">Class 8 · Science</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="review-card">
+          <div class="review-stars">★★★★★</div>
+          <p class="review-text">"Finally an AI that answers at MY level. I asked about the French Revolution and got a perfect Class 7 explanation!"</p>
+          <div class="review-author">
+            <div class="review-avatar" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">S</div>
+            <div>
+              <div class="review-name">Sofia Martínez</div>
+              <div class="review-meta">Class 7 · History</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="review-card">
+          <div class="review-stars">★★★★★</div>
+          <p class="review-text">"I asked three follow-up questions about supply and demand and it remembered everything. Super helpful for Economics!"</p>
+          <div class="review-author">
+            <div class="review-avatar" style="background:linear-gradient(135deg,#10b981,#059669)">R</div>
+            <div>
+              <div class="review-name">Rohan Mehta</div>
+              <div class="review-meta">Class 12 · Economics</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="review-card">
+          <div class="review-stars">★★★★★</div>
+          <p class="review-text">"PandaGPT helped me write a grammatically perfect essay on Romeo &amp; Juliet in 20 minutes. My teacher was impressed!"</p>
+          <div class="review-author">
+            <div class="review-avatar" style="background:linear-gradient(135deg,#a855f7,#ec4899)">L</div>
+            <div>
+              <div class="review-name">Lily Chen</div>
+              <div class="review-meta">Class 9 · English</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="review-card">
+          <div class="review-stars">★★★★★</div>
+          <p class="review-text">"I just speak my question out loud and get a detailed answer instantly. Best study tool I've ever used!"</p>
+          <div class="review-author">
+            <div class="review-avatar" style="background:linear-gradient(135deg,#f97316,#eab308)">D</div>
+            <div>
+              <div class="review-name">David Okafor</div>
+              <div class="review-meta">Class 6 · Geography</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <section class="features">
+      <div class="section-header">
+        <h2 class="section-title">Everything You Need</h2>
+        <p class="section-sub">Chat naturally with AI across all major school subjects.</p>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card" style="--delay:0s">
+          <div class="feature-icon">💬</div>
+          <h3 class="feature-title">Real Chat Interface</h3>
+          <p class="feature-desc">Have a back-and-forth conversation with AI — ask follow-ups, get clarifications, dig deeper.</p>
+        </div>
+        <div class="feature-card" style="--delay:0.06s">
+          <div class="feature-icon">🎙️</div>
+          <h3 class="feature-title">Voice Input & Output</h3>
+          <p class="feature-desc">Speak your question and have the AI read the answer aloud — hands-free learning.</p>
+        </div>
+        <div class="feature-card" style="--delay:0.12s">
+          <div class="feature-icon">🧠</div>
+          <h3 class="feature-title">8 Subjects</h3>
+          <p class="feature-desc">Math, Science, English, History, Geography, Computer Science, Economics, and Civics.</p>
+        </div>
+        <div class="feature-card" style="--delay:0.18s">
+          <div class="feature-icon">👤</div>
+          <h3 class="feature-title">Personal Account</h3>
+          <p class="feature-desc">Sign in to keep your profile — name and class pre-filled every time.</p>
+        </div>
+        <div class="feature-card" style="--delay:0.24s">
+          <div class="feature-icon">➗</div>
+          <h3 class="feature-title">Step-by-Step Math</h3>
+          <p class="feature-desc">Every calculation shown and explained — never just the final answer.</p>
+        </div>
+        <div class="feature-card" style="--delay:0.30s">
+          <div class="feature-icon">📋</div>
+          <h3 class="feature-title">Session History</h3>
+          <p class="feature-desc">Review all your Q&amp;A sessions from the current session anytime.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="how-it-works">
+      <div class="section-header">
+        <h2 class="section-title">How It Works</h2>
+        <p class="section-sub">Three simple steps to get the answer you need.</p>
+      </div>
+      <div class="steps-grid">
+        <div class="step-card">
+          <div class="step-num">01</div>
+          <h3 class="step-title">Set Your Profile</h3>
+          <p class="step-desc">Enter your name, class, and pick a subject from 8 options.</p>
+        </div>
+        <div class="step-connector"></div>
+        <div class="step-card">
+          <div class="step-num">02</div>
+          <h3 class="step-title">Ask via Text or Voice</h3>
+          <p class="step-desc">Type your question or tap the mic to speak it aloud.</p>
+        </div>
+        <div class="step-connector"></div>
+        <div class="step-card">
+          <div class="step-num">03</div>
+          <h3 class="step-title">Chat Back & Forth</h3>
+          <p class="step-desc">Follow up, ask for clarification, and dive deeper with the AI.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============================================================ PAGE: HOMEWORK HELPER ============================================================ -->
+  <main id="page-helper" class="page">
+    <section class="helper-section">
+      <div class="helper-layout">
+
+        <!-- Left: Profile panel -->
+        <div class="helper-form-panel glass-card">
+          <div class="panel-header">
+            <span class="panel-icon">🤖</span>
+            <div>
+              <h2 class="panel-title">Your Profile</h2>
+              <p class="panel-sub">Set once, ask anything</p>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="studentName">👤 Student Name</label>
+            <input type="text" id="studentName" class="form-input" placeholder="Enter your name…" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="studentClass">🏫 Class</label>
+            <select id="studentClass" class="form-input form-select">
+              <option value="" disabled selected>Select your class…</option>
+              <option value="1">Class 1</option>
+              <option value="2">Class 2</option>
+              <option value="3">Class 3</option>
+              <option value="4">Class 4</option>
+              <option value="5">Class 5</option>
+              <option value="6">Class 6</option>
+              <option value="7">Class 7</option>
+              <option value="8">Class 8</option>
+              <option value="9">Class 9</option>
+              <option value="10">Class 10</option>
+              <option value="11">Class 11</option>
+              <option value="12">Class 12</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">📖 Subject</label>
+            <div class="subject-grid" id="subjectGrid">
+              <label class="subject-chip"><input type="radio" name="subject" value="Math" /><span>➗ Math</span></label>
+              <label class="subject-chip"><input type="radio" name="subject" value="Science" /><span>🔬 Science</span></label>
+              <label class="subject-chip"><input type="radio" name="subject" value="English" /><span>📝 English</span></label>
+              <label class="subject-chip"><input type="radio" name="subject" value="History" /><span>📜 History</span></label>
+              <label class="subject-chip"><input type="radio" name="subject" value="Geography" /><span>🌍 Geography</span></label>
+              <label class="subject-chip"><input type="radio" name="subject" value="Computer" /><span>💻 Computer</span></label>
+              <label class="subject-chip"><input type="radio" name="subject" value="Economics" /><span>💰 Economics</span></label>
+              <label class="subject-chip"><input type="radio" name="subject" value="Civics" /><span>🏛️ Civics</span></label>
+            </div>
+          </div>
+
+          <button class="btn btn-ghost btn-full" style="margin-top:8px" onclick="clearChat()">
+            🔄 New Chat
+          </button>
+
+          <div class="voice-status glass-card" id="voiceStatusCard" style="display:none; margin-top:16px; padding:12px 16px;">
+            <div class="voice-status-inner">
+              <div class="recording-dot"></div>
+              <span id="voiceStatusText">Listening…</span>
+              <button class="icon-btn" onclick="stopVoiceInput()" style="margin-left:auto; padding:4px 10px; font-size:0.8rem;">Stop</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Chat panel -->
+        <div class="chat-panel glass-card">
+
+          <div class="chat-header">
+            <div class="chat-header-info">
+              <span class="chat-header-icon">💬</span>
+              <span class="chat-header-title">AI Conversation</span>
+            </div>
+            <div class="chat-header-actions">
+              <button class="icon-btn" id="speakAllBtn" onclick="speakLastAnswer()" title="Read last answer aloud" style="display:none">🔊 Read</button>
+            </div>
+          </div>
+
+          <!-- Messages area -->
+          <div class="chat-messages" id="chatMessages">
+            <div class="chat-welcome" id="chatWelcome">
+              <div class="welcome-icon">🎓</div>
+              <h3>Ready to Help!</h3>
+              <p>Fill in your profile on the left, then type or speak your homework question below.</p>
+              <div class="welcome-tips">
+                <span class="tip-chip">🎙️ Voice input supported</span>
+                <span class="tip-chip">💬 Ask follow-up questions</span>
+                <span class="tip-chip">🔊 AI can read answers aloud</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Chat input -->
+          <div class="chat-input-area">
+            <div class="chat-input-row">
+              <textarea
+                id="chatInput"
+                class="chat-textarea"
+                placeholder="Ask your homework question… (Enter to send, Shift+Enter for new line)"
+                rows="2"
+                onkeydown="handleChatKeydown(event)"
+              ></textarea>
+              <div class="chat-input-btns">
+                <button class="mic-btn" id="micBtn" onclick="toggleVoiceInput()" title="Voice input" aria-label="Start voice input">
+                  🎙️
+                </button>
+                <button class="send-btn btn btn-primary" id="sendBtn" onclick="sendChatMessage()" title="Send message">
+                  ▶
+                </button>
+              </div>
+            </div>
+            <div class="chat-input-hint">
+              <span>Press <kbd>Enter</kbd> to send · <kbd>Shift+Enter</kbd> for new line · 🎙️ for voice</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============================================================ PAGE: ABOUT ============================================================ -->
+  <main id="page-about" class="page">
+    <section class="about-section">
+      <div class="about-hero glass-card">
+        <div class="about-avatar">🐼</div>
+        <h1 class="about-title">About PandaGPT</h1>
+        <p class="about-tagline">Making learning easier, one conversation at a time.</p>
+      </div>
+
+      <div class="about-grid">
+        <div class="about-card glass-card">
+          <div class="about-card-icon">🎯</div>
+          <h3>Our Mission</h3>
+          <p>Every student deserves clear, instant explanations. PandaGPT bridges the gap between a question and understanding.</p>
+        </div>
+        <div class="about-card glass-card">
+          <div class="about-card-icon">💬</div>
+          <h3>Real Chat</h3>
+          <p>Not just a Q&amp;A box — a real back-and-forth conversation so you can follow up, ask for examples, and go deeper.</p>
+        </div>
+        <div class="about-card glass-card">
+          <div class="about-card-icon">🎙️</div>
+          <h3>Voice Support</h3>
+          <p>Speak your question and have the AI answer read aloud. Perfect for auditory learners or hands-free study.</p>
+        </div>
+        <div class="about-card glass-card">
+          <div class="about-card-icon">🔒</div>
+          <h3>Safe &amp; Private</h3>
+          <p>Your AI key never leaves the server. Passwords are hashed. Sessions are secure. Your data stays yours.</p>
+        </div>
+      </div>
+
+      <div class="about-subjects glass-card">
+        <h2>Subjects We Cover</h2>
+        <div class="subject-tags">
+          <span class="tag">➗ Mathematics</span>
+          <span class="tag">🔬 Science</span>
+          <span class="tag">📝 English</span>
+          <span class="tag">📜 History</span>
+          <span class="tag">🌍 Geography</span>
+          <span class="tag">💻 Computer Science</span>
+          <span class="tag">💰 Economics</span>
+          <span class="tag">🏛️ Civics</span>
+        </div>
+        <p class="subjects-note">Supporting students from Class 1 to Class 12.</p>
+      </div>
+
+      <div class="about-cta glass-card">
+        <h2>Ready to Get Started?</h2>
+        <p>Ask your first question — it's completely free!</p>
+        <button class="btn btn-primary btn-lg" onclick="showPage('helper')">🚀 Try PandaGPT</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============================================================ PAGE: HISTORY ============================================================ -->
+  <main id="page-history" class="page">
+    <section class="history-section">
+      <div class="history-header">
+        <div class="history-title-row">
+          <h1 class="history-title">📋 Session History</h1>
+          <p class="history-subtitle">Conversations from this session</p>
+        </div>
+        <button class="btn btn-ghost" onclick="clearHistory()" id="clearHistoryBtn" style="display:none">
+          🗑️ Clear History
+        </button>
+      </div>
+
+      <div class="history-empty glass-card" id="historyEmpty">
+        <div class="history-empty-icon">📭</div>
+        <h3>No conversations yet</h3>
+        <p>Start a chat and it will appear here.</p>
+        <button class="btn btn-primary" onclick="showPage('helper')">🚀 Ask a Question</button>
+      </div>
+
+      <div class="history-list" id="historyList"></div>
+    </section>
+  </main>
+
+  <!-- ========================================================== QUIZ PAGE ========================================================== -->
+  <main id="page-quiz" class="page">
+
+      <!-- ── Setup Screen ── -->
+      <div id="quiz-setup" class="quiz-screen quiz-setup-screen">
+        <div class="quiz-setup-card">
+          <div class="quiz-setup-header">
+            <div class="quiz-setup-icon">🧠</div>
+            <h2 class="quiz-setup-title">Create Your Quiz</h2>
+            <p class="quiz-setup-sub">Customise and let PandaGPT generate questions just for you</p>
+          </div>
+
+          <div class="quiz-fields">
+            <div class="quiz-field-group">
+              <label class="quiz-label">📚 Subject</label>
+              <div class="quiz-chips" id="quizSubjectChips">
+                <button class="quiz-chip" data-val="Math"             onclick="selectQuizChip(this,'subject')">➕ Math</button>
+                <button class="quiz-chip" data-val="Science"          onclick="selectQuizChip(this,'subject')">🔬 Science</button>
+                <button class="quiz-chip" data-val="History"          onclick="selectQuizChip(this,'subject')">📜 History</button>
+                <button class="quiz-chip" data-val="English"          onclick="selectQuizChip(this,'subject')">📖 English</button>
+                <button class="quiz-chip" data-val="Geography"        onclick="selectQuizChip(this,'subject')">🌍 Geography</button>
+                <button class="quiz-chip" data-val="Computer Science" onclick="selectQuizChip(this,'subject')">💻 CS</button>
+                <button class="quiz-chip" data-val="Economics"        onclick="selectQuizChip(this,'subject')">💰 Economics</button>
+                <button class="quiz-chip" data-val="Civics"           onclick="selectQuizChip(this,'subject')">🏛️ Civics</button>
+              </div>
+            </div>
+
+            <div class="quiz-field-group">
+              <label class="quiz-label">🎓 Class</label>
+              <div class="quiz-chips" id="quizClassChips">
+                <button class="quiz-chip" data-val="1"  onclick="selectQuizChip(this,'classLevel')">1</button>
+                <button class="quiz-chip" data-val="2"  onclick="selectQuizChip(this,'classLevel')">2</button>
+                <button class="quiz-chip" data-val="3"  onclick="selectQuizChip(this,'classLevel')">3</button>
+                <button class="quiz-chip" data-val="4"  onclick="selectQuizChip(this,'classLevel')">4</button>
+                <button class="quiz-chip" data-val="5"  onclick="selectQuizChip(this,'classLevel')">5</button>
+                <button class="quiz-chip" data-val="6"  onclick="selectQuizChip(this,'classLevel')">6</button>
+                <button class="quiz-chip" data-val="7"  onclick="selectQuizChip(this,'classLevel')">7</button>
+                <button class="quiz-chip" data-val="8"  onclick="selectQuizChip(this,'classLevel')">8</button>
+                <button class="quiz-chip" data-val="9"  onclick="selectQuizChip(this,'classLevel')">9</button>
+                <button class="quiz-chip" data-val="10" onclick="selectQuizChip(this,'classLevel')">10</button>
+                <button class="quiz-chip" data-val="11" onclick="selectQuizChip(this,'classLevel')">11</button>
+                <button class="quiz-chip" data-val="12" onclick="selectQuizChip(this,'classLevel')">12</button>
+              </div>
+            </div>
+
+            <div class="quiz-field-row">
+              <div class="quiz-field-group">
+                <label class="quiz-label">❓ Number of Questions</label>
+                <div class="quiz-chips" id="quizNumChips">
+                  <button class="quiz-chip" data-val="5"  onclick="selectQuizChip(this,'num')">5</button>
+                  <button class="quiz-chip selected" data-val="10" onclick="selectQuizChip(this,'num')">10</button>
+                  <button class="quiz-chip" data-val="15" onclick="selectQuizChip(this,'num')">15</button>
+                  <button class="quiz-chip" data-val="20" onclick="selectQuizChip(this,'num')">20</button>
+                </div>
+              </div>
+
+              <div class="quiz-field-group">
+                <label class="quiz-label">⚡ Difficulty</label>
+                <div class="quiz-chips" id="quizDiffChips">
+                  <button class="quiz-chip" data-val="Easy"   onclick="selectQuizChip(this,'diff')">🟢 Easy</button>
+                  <button class="quiz-chip selected" data-val="Medium" onclick="selectQuizChip(this,'diff')">🟡 Medium</button>
+                  <button class="quiz-chip" data-val="Hard"   onclick="selectQuizChip(this,'diff')">🔴 Hard</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="quiz-field-group">
+              <label class="quiz-label">⏱️ Timer per Question</label>
+              <div class="quiz-chips" id="quizTimerChips">
+                <button class="quiz-chip selected" data-val="0"  onclick="selectQuizChip(this,'timer')">No Timer</button>
+                <button class="quiz-chip" data-val="15" onclick="selectQuizChip(this,'timer')">15 s</button>
+                <button class="quiz-chip" data-val="30" onclick="selectQuizChip(this,'timer')">30 s</button>
+                <button class="quiz-chip" data-val="60" onclick="selectQuizChip(this,'timer')">60 s</button>
+              </div>
+            </div>
+          </div>
+
+          <button class="btn btn-primary btn-lg quiz-start-btn" onclick="startQuiz()">🚀 Generate Quiz</button>
+        </div>
+      </div>
+
+      <!-- ── Loading Screen ── -->
+      <div id="quiz-loading" class="quiz-screen quiz-loading-screen" style="display:none">
+        <div class="quiz-loading-panda">🐼</div>
+        <p class="quiz-loading-text">Generating your quiz…</p>
+        <p class="quiz-loading-sub">PandaGPT is crafting personalised questions for you</p>
+      </div>
+
+      <!-- ── Question Screen ── -->
+      <div id="quiz-question" class="quiz-screen quiz-question-screen" style="display:none">
+        <div class="quiz-q-header">
+          <div class="quiz-progress-wrap">
+            <div class="quiz-progress-label">
+              <span id="quiz-progress-text">Question 1 of 10</span>
+              <span id="quiz-score-live">Score: 0</span>
+            </div>
+            <div class="quiz-progress-track">
+              <div class="quiz-progress-bar" id="quiz-progress-bar"></div>
+            </div>
+          </div>
+          <div class="quiz-timer-wrap" id="quiz-timer-display" style="display:none">
+            <svg class="quiz-timer-svg" viewBox="0 0 50 50">
+              <circle class="quiz-timer-bg"   cx="25" cy="25" r="20"/>
+              <circle class="quiz-timer-ring" id="quiz-timer-ring" cx="25" cy="25" r="20"/>
+            </svg>
+            <span class="quiz-timer-num" id="quiz-timer-num">30</span>
+          </div>
+        </div>
+
+        <div class="quiz-q-body">
+          <p class="quiz-q-text" id="quiz-question-text"></p>
+          <div class="quiz-options" id="quiz-options"></div>
+          <div class="quiz-explanation" id="quiz-explanation" style="display:none"></div>
+        </div>
+
+        <div class="quiz-q-footer">
+          <button class="btn btn-primary" id="quiz-next-btn" onclick="nextQuestion()" disabled>Next →</button>
+        </div>
+      </div>
+
+      <!-- ── Results Screen ── -->
+      <div id="quiz-results" class="quiz-screen quiz-results-screen" style="display:none">
+        <div class="quiz-score-card">
+          <div class="quiz-grade-emoji" id="quiz-grade-emoji">🏆</div>
+          <h2 class="quiz-grade-text" id="quiz-grade-text">Excellent!</h2>
+          <div class="quiz-score-big" id="quiz-score-num">8 / 10</div>
+          <div class="quiz-score-pct" id="quiz-score-pct">80%</div>
+          <div class="quiz-score-stats" id="quiz-score-stats"></div>
+          <div class="quiz-result-btns">
+            <button class="btn btn-primary"   onclick="retakeQuiz()">🔄 Retake Same Quiz</button>
+            <button class="btn btn-secondary" onclick="backToQuizSetup()">⚙️ New Settings</button>
+          </div>
+        </div>
+
+        <div class="quiz-review-section">
+          <h3 class="quiz-review-title">📋 Answer Review</h3>
+          <div id="quiz-review"></div>
+        </div>
+      </div>
+
+  </main>
+
+  <!-- ============================================================ FOOTER ============================================================ -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-logo"><span>🐼</span> PandaGPT</div>
+      <p class="footer-credit">Made with ❤️ by Sumay</p>
+      <div class="footer-links">
+        <a href="#" onclick="showPage('home');    return false;">Home</a>
+        <a href="#" onclick="showPage('helper');  return false;">Helper</a>
+        <a href="#" onclick="showPage('history'); return false;">History</a>
+        <a href="#" onclick="showPage('about');   return false;">About</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script src="/script.js"></script>
+</body>
+</html>
