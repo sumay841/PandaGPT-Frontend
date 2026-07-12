@@ -898,7 +898,7 @@ async function startQuiz() {
   showQuizScreen('quiz-loading');
 
   try {
-    const resp = await fetch('/api/quiz/generate', {
+    const resp = await fetch('https://pandagpt-backend.onrender.com/api/quiz/generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
