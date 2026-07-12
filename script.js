@@ -211,7 +211,7 @@ async function handleRegister(event) {
   btn.querySelector('.btn-text').textContent = 'Creating account…';
 
   try {
-    const res  = await fetch('/api/auth/register', {
+    const res  = await fetch('https://pandagpt-backend.onrender.com/api/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ fullName, username, email, password }),
