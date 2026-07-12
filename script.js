@@ -279,7 +279,7 @@ async function sendChatMessage() {
   setInputDisabled(true);
 
   try {
-    const res  = await fetch('/api/ask', {
+    const res  = await fetch('https://pandagpt-backend.onrender.com/api/ask', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, studentClass: klass, subject, messages: [...chatMessages] }),
