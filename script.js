@@ -234,7 +234,7 @@ async function handleRegister(event) {
 }
 
 async function handleLogout() {
-  await fetch('/api/auth/logout', { method: 'POST' }).catch(() => {});
+  await fetch('https://pandagpt-backend.onrender.com/api/auth/logout', { method: 'POST' }).catch(() => {});
   currentUser = null;
   updateNavAuth();
   showToast('👋 Logged out successfully');
