@@ -67,7 +67,7 @@ window.addEventListener('scroll', () => {
 ================================================================ */
 async function checkAuthStatus() {
   try {
-    const res = await fetch('/api/auth/me');
+    const res = await fetch('https://pandagpt-backend.onrender.com/api/auth/me');
     if (res.ok) {
       currentUser = await res.json();
     } else {
